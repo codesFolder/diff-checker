@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Text Difference Checker</title>
+    <title>Text Difference Checker</title>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -23,6 +23,28 @@
             padding: 10px;
             border: 1px solid #d1d5da;
             border-radius: 6px;
+            box-sizing: border-box; /* Ensures padding is included in width/height */
+        }
+
+        /* --- NEW: Editor & Paste Button Styling --- */
+        .editor-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            padding: 0 5px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+        .paste-btn {
+            font-size: 0.8rem;
+            padding: 3px 10px;
+            font-weight: 500;
         }
 
         .main-controls { 
@@ -77,10 +99,25 @@
 </head>
 <body>
     <div class="container">
-        <h1>Advanced Text Difference Checker</h1>
+        <!-- TITLE UPDATED -->
+        <h1>Text Difference Checker</h1>
+
+        <!-- HTML STRUCTURE UPDATED FOR PASTE BUTTONS -->
         <div class="text-inputs">
-            <textarea id="text1" placeholder="Paste the original text here..."></textarea>
-            <textarea id="text2" placeholder="Paste the new text here..."></textarea>
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span>Original Text</span>
+                    <button id="paste1" class="secondary-btn paste-btn">Paste</button>
+                </div>
+                <textarea id="text1" placeholder="Paste the original text here..."></textarea>
+            </div>
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span>New Text</span>
+                    <button id="paste2" class="secondary-btn paste-btn">Paste</button>
+                </div>
+                <textarea id="text2" placeholder="Paste the new text here..."></textarea>
+            </div>
         </div>
 
         <div id="stats-output"></div>
@@ -118,9 +155,33 @@
         const summaryMessageEl = document.getElementById('summaryMessage');
         const copySummaryButton = document.getElementById('copySummaryButton');
         const outputDiv = document.getElementById('diff-output');
-
-        // --- Event Listeners for Buttons ---
         
+        // --- NEW: References for Paste Buttons ---
+        const paste1Btn = document.getElementById('paste1');
+        const paste2Btn = document.getElementById('paste2');
+
+        // --- NEW: Event Listeners for Paste Buttons ---
+        paste1Btn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                text1El.value = text;
+            } catch (err) {
+                console.error('Failed to read clipboard: ', err);
+                alert('Could not paste from clipboard. Please ensure you have granted permission.');
+            }
+        });
+
+        paste2Btn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                text2El.value = text;
+            } catch (err) {
+                console.error('Failed to read clipboard: ', err);
+                alert('Could not paste from clipboard. Please ensure you have granted permission.');
+            }
+        });
+        
+        // --- Event Listeners for other Buttons ---
         clearButton.addEventListener('click', () => {
             text1El.value = '';
             text2El.value = '';
@@ -146,6 +207,7 @@
         });
 
         compareButton.addEventListener('click', async () => {
+            // ... (The rest of the compare logic remains exactly the same) ...
             outputDiv.innerHTML = '<p style="text-align: center; padding: 20px;">Comparing...</p>';
             statsDiv.innerHTML = '';
             summaryDiv.style.display = 'none';
@@ -167,10 +229,8 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 
-                // 1. Display Diff HTML
                 outputDiv.innerHTML = data.diff_html;
 
-                // 2. Display Word/Char/Line Stats
                 const stats = data.stats;
                 statsDiv.innerHTML = `
                     <div class="stats-box">
@@ -183,7 +243,6 @@
                     </div>
                 `;
 
-                // 3. Create and Display Summary Message
                 const summary = data.summary;
                 let message = '';
                 if (summary.added === 0 && summary.deleted === 0) {
