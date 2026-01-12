@@ -340,6 +340,19 @@
             font-size: 13px;
             color: #aaa;
         }
+        #interactive-view .editor-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #editor-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
     </style>
 </head>
 
@@ -411,8 +424,8 @@
     </header>
 
     <div id="interactive-view" class="view-container active">
-        <div style="flex: 1; display:flex; flex-direction:column; overflow:hidden;">
-            <div id="editor-container"></div>
+        <div style="flex: 1; position: relative; overflow: hidden;">
+            <div id="editor-container" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>
         </div>
 
         <div id="version-sidebar" class="collapsed">
@@ -422,7 +435,6 @@
             </div>
 
             <div class="version-list" id="version-list">
-                <!-- Versions will render here -->
                 <div style="text-align:center; color:#888; font-size:12px; margin-top:20px;">No saved versions</div>
             </div>
 
@@ -536,11 +548,20 @@
             // B. CREATE EDITOR
             diffEditor = monaco.editor.createDiffEditor(document.getElementById('editor-container'), {
                 theme: 'vs-dark',
-                originalEditable: true, // Allow editing left side
+                originalEditable: true,
                 readOnly: false,
                 renderSideBySide: true,
                 ignoreTrimWhitespace: false,
-                renderIndicators: true // Shows the arrows for merging
+                renderIndicators: true,
+                
+                // --- NEW FIXES BELOW ---
+                automaticLayout: true,       // Fixes the window scrolling/header hiding issue
+                scrollBeyondLastLine: false, // Stops scrolling way past the end
+                minimap: { 
+                    enabled: true,           // Adds the visual map on the right
+                    scale: 1                 // Makes the map large enough to click easily
+                },
+                fixedOverflowWidgets: true   // Prevents popups from being cut off
             });
 
             originalModel = monaco.editor.createModel("", "text/plain");
@@ -787,5 +808,6 @@
     </script>
 
 </body>
+
 
 </html>
