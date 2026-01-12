@@ -391,6 +391,12 @@
                 <span>Inline View</span>
             </label>
 
+            <label class="toggle-label" title="Ignore leading/trailing whitespace">
+                <input type="checkbox" id="whitespace-toggle" onchange="toggleWhitespace()" checked>
+                <div class="toggle-switch"></div>
+                <span>Ignore Space</span>
+            </label>
+
             <label class="toggle-label" title="Auto-compare on typing">
                 <input type="checkbox" id="live-toggle" checked>
                 <div class="toggle-switch"></div>
@@ -520,7 +526,7 @@
 
         require(['vs/editor/editor.main'], function () {
 
-            // A. DEFINE CUSTOM THEMES
+            // A. DEFINE CUSTOM THEMES (Keep your themes here)
             monaco.editor.defineTheme('peach', {
                 base: 'vs',
                 inherit: true,
@@ -551,17 +557,15 @@
                 originalEditable: true,
                 readOnly: false,
                 renderSideBySide: true,
-                ignoreTrimWhitespace: false,
-                renderIndicators: true,
                 
-                // --- NEW FIXES BELOW ---
-                automaticLayout: true,       // Fixes the window scrolling/header hiding issue
-                scrollBeyondLastLine: false, // Stops scrolling way past the end
-                minimap: { 
-                    enabled: true,           // Adds the visual map on the right
-                    scale: 1                 // Makes the map large enough to click easily
-                },
-                fixedOverflowWidgets: true   // Prevents popups from being cut off
+                // --- UPDATE: READS FROM CHECKBOX ---
+                ignoreTrimWhitespace: document.getElementById('whitespace-toggle').checked,
+                // -----------------------------------
+
+                renderIndicators: true,
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                minimap: { enabled: true }
             });
 
             originalModel = monaco.editor.createModel("", "text/plain");
@@ -804,6 +808,11 @@
                     saveVersion(true);
                 }, seconds * 1000);
             }
+        }
+
+        function toggleWhitespace() {
+            const isIgnored = document.getElementById('whitespace-toggle').checked;
+            diffEditor.updateOptions({ ignoreTrimWhitespace: isIgnored });
         }
     </script>
 
